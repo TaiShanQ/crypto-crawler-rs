@@ -60,6 +60,9 @@ pub fn get_market_types(exchange: &str) -> Vec<MarketType> {
             MarketType::InverseSwap,
             // MarketType::EuropeanOption, // binance has shutdown option markets.
         ],
+        "binance_us" => vec![
+            MarketType::Spot,
+        ],
         "bitfinex" => vec![MarketType::Spot, MarketType::LinearSwap],
         "bitget" => vec![
             MarketType::Spot,

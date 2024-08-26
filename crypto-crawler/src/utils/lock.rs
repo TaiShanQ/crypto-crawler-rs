@@ -6,6 +6,7 @@ use once_cell::sync::Lazy;
 
 const EXCHANGES: &[&str] = &[
     "binance",
+    "binance_us",
     "bitfinex",
     "bitget",
     "bithumb",
@@ -49,6 +50,10 @@ fn get_lock_file_name(exchange: &str, market_type: MarketType, prefix: &str) -> 
             MarketType::LinearSwap | MarketType::LinearFuture => "binance_linear.lock".to_string(),
             MarketType::Spot => "binance_spot.lock".to_string(),
             MarketType::EuropeanOption => "binance_option.lock".to_string(),
+            _ => panic!("Unknown market_type {market_type} of {exchange}"),
+        },
+        "binance_us" => match market_type {
+            MarketType::Spot => "binance_us_spot.lock".to_string(),
             _ => panic!("Unknown market_type {market_type} of {exchange}"),
         },
         "bitfinex" => "bitfinex.lock".to_string(),

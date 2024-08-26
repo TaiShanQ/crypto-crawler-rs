@@ -124,6 +124,7 @@ impl<H: MessageHandler> WSClientInternal<H> {
                     let resp = match self.exchange {
                         crate::clients::huobi::EXCHANGE_NAME
                         | crate::clients::binance::EXCHANGE_NAME
+                        | crate::clients::binance_us::EXCHANGE_NAME
                         | "bitget"
                         | "bitz" => {
                             let mut decoder = GzDecoder::new(&binary[..]);

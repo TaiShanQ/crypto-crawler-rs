@@ -25,6 +25,7 @@ use error::Result;
 pub fn fetch_symbols(exchange: &str, market_type: MarketType) -> Result<Vec<String>> {
     match exchange {
         "binance" => exchanges::binance::fetch_symbols(market_type),
+        "binance_us" => exchanges::binance::fetch_us_symbols(market_type),
         "bitfinex" => exchanges::bitfinex::fetch_symbols(market_type),
         "bitget" => exchanges::bitget::fetch_symbols(market_type),
         "bithumb" => exchanges::bithumb::fetch_symbols(market_type),
@@ -67,6 +68,7 @@ pub fn fetch_symbols(exchange: &str, market_type: MarketType) -> Result<Vec<Stri
 pub fn fetch_markets(exchange: &str, market_type: MarketType) -> Result<Vec<Market>> {
     match exchange {
         "binance" => exchanges::binance::fetch_markets(market_type),
+        "binance_us" => exchanges::binance::fetch_us_markets(market_type),
         "bitfinex" => exchanges::bitfinex::fetch_markets(market_type),
         "bitget" => exchanges::bitget::fetch_markets(market_type),
         "bithumb" => exchanges::bithumb::fetch_markets(market_type),
