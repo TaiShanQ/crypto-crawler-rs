@@ -238,6 +238,7 @@ pub async fn crawl_trade(
 ) {
     match exchange {
         "binance" => crawlers::binance::crawl_trade(market_type, symbols, tx).await,
+        "binance_us" => crawlers::binance_us::crawl_trade(market_type, symbols, tx).await,
         "bitmex" => crawlers::bitmex::crawl_trade(market_type, symbols, tx).await,
         "deribit" => crawlers::deribit::crawl_trade(market_type, symbols, tx).await,
         "bitfinex" | "bitget" | "bithumb" | "bitstamp" | "bitz" | "bybit" | "coinbase_pro"
@@ -259,7 +260,7 @@ pub async fn crawl_l2_event(
     match exchange {
         "bitmex" => crawlers::bitmex::crawl_l2_event(market_type, symbols, tx).await,
         "huobi" => crawlers::huobi::crawl_l2_event(market_type, symbols, tx).await,
-        "binance" | "bitfinex" | "bitget" | "bithumb" | "bitstamp" | "bitz" | "bybit"
+        "binance" | "binance_us" | "bitfinex" | "bitget" | "bithumb" | "bitstamp" | "bitz" | "bybit"
         | "coinbase_pro" | "deribit" | "dydx" | "ftx" | "gate" | "kraken" | "kucoin" | "mexc"
         | "okx" | "zb" | "zbg" => {
             crawlers::crawl_event(exchange, MessageType::L2Event, market_type, symbols, tx).await
@@ -302,6 +303,7 @@ pub async fn crawl_bbo(
 ) {
     match exchange {
         "binance" => crawlers::binance::crawl_bbo(market_type, symbols, tx).await,
+        "binance_us" => crawlers::binance_us::crawl_bbo(market_type, symbols, tx).await,
         "bitmex" => crawlers::bitmex::crawl_bbo(market_type, symbols, tx).await,
         "kucoin" => crawlers::kucoin::crawl_bbo(market_type, symbols, tx).await,
         "deribit" | "ftx" | "gate" | "huobi" | "kraken" | "okx" => {
@@ -350,6 +352,7 @@ pub async fn crawl_ticker(
 ) {
     match exchange {
         "binance" => crawlers::binance::crawl_ticker(market_type, symbols, tx).await,
+        "binance_us" => crawlers::binance_us::crawl_ticker(market_type, symbols, tx).await,
         "bitfinex" | "bitget" | "bithumb" | "bitz" | "bybit" | "coinbase_pro" | "deribit"
         | "gate" | "huobi" | "kraken" | "kucoin" | "mexc" | "okx" => {
             crawlers::crawl_event(exchange, MessageType::Ticker, market_type, symbols, tx).await
@@ -369,6 +372,7 @@ pub async fn crawl_funding_rate(
 ) {
     match exchange {
         "binance" => crawlers::binance::crawl_funding_rate(market_type, symbols, tx).await,
+        "binance_us" => crawlers::binance_us::crawl_funding_rate(market_type, symbols, tx).await,
         "bitmex" => crawlers::bitmex::crawl_funding_rate(market_type, symbols, tx).await,
         "huobi" => crawlers::huobi::crawl_funding_rate(market_type, symbols, tx).await,
         "okx" => crawlers::okx::crawl_funding_rate(market_type, symbols, tx).await,

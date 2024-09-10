@@ -75,7 +75,7 @@ pub(super) fn check_args(exchange: &str, market_type: MarketType, symbols: &[Str
 
 fn get_cooldown_time_per_request(exchange: &str, market_type: MarketType) -> Duration {
     let millis = match exchange {
-        "binance" => 500,    // spot weitht 1200, contract weight 2400
+        "binance" | "binance_us" => 500,    // spot weight 1200, contract weight 2400
         "bitget" => 100,     // 20 requests per 2 seconds
         "bithumb" => 8 * 10, /* 135 requests per 1 second for public APIs, multiplied by 10 to */
         // reduce its frequency
@@ -248,7 +248,7 @@ pub(crate) fn crawl_open_interest(exchange: &str, market_type: MarketType, tx: S
                     lock_.unlock().unwrap();
                 }
             }
-            "binance" | "bitget" | "bybit" | "gate" | "zbg" => {
+            "binance" | "binance_us" | "bitget" | "bybit" | "gate" | "zbg" => {
                 let real_symbols = fetch_symbols_retry(exchange, market_type);
 
                 let mut index = 0_usize;
@@ -348,7 +348,7 @@ fn get_connection_interval_ms(exchange: &str, _market_type: MarketType) -> Optio
 fn get_num_subscriptions_per_connection(exchange: &str, market_type: MarketType) -> usize {
     match exchange {
         // A single connection can listen to a maximum of 200 streams
-        "binance" => {
+        "binance" | "binance_us" => {
             if market_type == MarketType::Spot {
                 // https://binance-docs.github.io/apidocs/spot/en/#websocket-limits
                 1024
@@ -383,6 +383,10 @@ async fn create_ws_client_internal(
             }
             MarketType::EuropeanOption => Arc::new(BinanceOptionWSClient::new(tx, None).await),
             _ => panic!("Binance does NOT have the {market_type} market type"),
+        },
+        "binance_us" => match market_type {
+            MarketType::Spot => Arc::new(BinanceUsSpotWSClient::new(tx, None).await),
+            _ => panic!("Binance US does NOT have the {market_type} market type"),
         },
         "bitfinex" => Arc::new(BitfinexWSClient::new(tx, None).await),
         "bitget" => match market_type {
@@ -827,7 +831,7 @@ pub(crate) async fn crawl_event(
 // from 1m to 5m
 fn get_candlestick_intervals(exchange: &str, market_type: MarketType) -> Vec<usize> {
     match exchange {
-        "binance" => vec![60, 180, 300],
+        "binance" | "binance_us" => vec![60, 180, 300],
         "bybit" => vec![60, 180, 300],
         "deribit" => vec![60, 180, 300],
         "gate" => vec![10, 60, 300],

@@ -2,6 +2,7 @@ pub(super) mod binance_inverse;
 pub(super) mod binance_linear;
 pub(super) mod binance_option;
 pub(super) mod binance_spot;
+pub(super) mod binance_us_spot;
 mod utils;
 
 use crate::{error::Result, Market, MarketType};
@@ -26,6 +27,20 @@ pub(crate) fn fetch_markets(market_type: MarketType) -> Result<Vec<Market>> {
         MarketType::LinearSwap => binance_linear::fetch_linear_swap_markets(),
         MarketType::InverseSwap => binance_inverse::fetch_inverse_swap_markets(),
         MarketType::EuropeanOption => binance_option::fetch_option_markets(),
+        _ => panic!("Unsupported market_type: {market_type}"),
+    }
+}
+
+pub(crate) fn fetch_us_symbols(market_type: MarketType) -> Result<Vec<String>> {
+    match market_type {
+        MarketType::Spot => binance_us_spot::fetch_spot_symbols(),
+        _ => panic!("Unsupported market_type: {market_type}"),
+    }
+}
+
+pub(crate) fn fetch_us_markets(market_type: MarketType) -> Result<Vec<Market>> {
+    match market_type {
+        MarketType::Spot => binance_us_spot::fetch_spot_markets(),
         _ => panic!("Unsupported market_type: {market_type}"),
     }
 }

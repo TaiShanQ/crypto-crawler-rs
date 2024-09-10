@@ -8,3 +8,7 @@ members = [
   "crypto-rest-client",
   "crypto-ws-client",
 ]
+
+[patch.crates-io]
+crypto-message = { path = "../crypto-msg-parser/crypto-message" }
+crypto-msg-parser = { path = "../crypto-msg-parser/crypto-msg-parser" }

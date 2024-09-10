@@ -15,11 +15,9 @@ use crate::{
 use log::*;
 use serde_json::Value;
 
-pub(crate) const EXCHANGE_NAME: &str = "binance";
+pub(crate) const EXCHANGE_NAME: &str = "binance_us";
 
-const SPOT_WEBSOCKET_URL: &str = "wss://stream.binance.com:9443/stream";
-const LINEAR_WEBSOCKET_URL: &str = "wss://fstream.binance.com/stream";
-const INVERSE_WEBSOCKET_URL: &str = "wss://dstream.binance.com/stream";
+const SPOT_WEBSOCKET_URL: &str = "wss://stream.binance.us:9443/stream";
 
 // the websocket message size should not exceed 4096 bytes, otherwise
 // you'll get `code: 3001, reason: illegal request`
@@ -41,61 +39,45 @@ pub enum BinanceSubEx {
 }
 
 // Internal unified client
-pub struct BinanceWSClient<const MARKET_TYPE: char> {
-    client: WSClientInternal<BinanceMessageHandler>,
-    translator: BinanceCommandTranslator,
+pub struct BinanceUsWSClient<const MARKET_TYPE: char> {
+    client: WSClientInternal<BinanceUsMessageHandler>,
+    translator: BinanceUsCommandTranslator,
 }
 
 /// Binance Spot market.
 ///
 ///   * WebSocket API doc: <https://binance-docs.github.io/apidocs/spot/en/>
 ///   * Trading at: <https://www.binance.com/en/trade/BTC_USDT>
-pub type BinanceSpotWSClient = BinanceWSClient<'S'>;
+pub type BinanceUsSpotWSClient = BinanceUsWSClient<'S'>;
 
-/// Binance Coin-margined Future and Swap markets.
-///
-///   * WebSocket API doc: <https://binance-docs.github.io/apidocs/delivery/en/>
-///   * Trading at: <https://www.binance.com/en/delivery/btcusd_quarter>
-pub type BinanceInverseWSClient = BinanceWSClient<'I'>;
-
-/// Binance USDT-margined Future and Swap markets.
-///
-///   * WebSocket API doc: <https://binance-docs.github.io/apidocs/futures/en/>
-///   * Trading at: <https://www.binance.com/en/futures/BTC_USDT>
-pub type BinanceLinearWSClient = BinanceWSClient<'L'>;
-
-impl<const MARKET_TYPE: char> BinanceWSClient<MARKET_TYPE> {
+impl<const MARKET_TYPE: char> BinanceUsWSClient<MARKET_TYPE> {
     pub async fn new(tx: std::sync::mpsc::Sender<String>, url: Option<&str>) -> Self {
         let real_url = match url {
             Some(endpoint) => endpoint,
             None => {
                 if MARKET_TYPE == 'S' {
                     SPOT_WEBSOCKET_URL
-                } else if MARKET_TYPE == 'I' {
-                    INVERSE_WEBSOCKET_URL
-                } else if MARKET_TYPE == 'L' {
-                    LINEAR_WEBSOCKET_URL
                 } else {
                     panic!("Unknown market type {MARKET_TYPE}");
                 }
             }
         };
-        BinanceWSClient {
+        BinanceUsWSClient {
             client: WSClientInternal::connect(
                 EXCHANGE_NAME,
                 real_url,
-                BinanceMessageHandler {},
+                BinanceUsMessageHandler {},
                 Some(UPLINK_LIMIT),
                 tx,
             )
             .await,
-            translator: BinanceCommandTranslator { market_type: MARKET_TYPE },
+            translator: BinanceUsCommandTranslator { market_type: MARKET_TYPE },
         }
     }
 }
 
 #[async_trait]
-impl<const URL: char> WSClient for BinanceWSClient<URL> {
+impl<const URL: char> WSClient for BinanceUsWSClient<URL> {
     async fn subscribe_trade(&self, symbols: &[String]) {
         let topics = symbols
             .iter()
@@ -169,12 +151,12 @@ impl<const URL: char> WSClient for BinanceWSClient<URL> {
     }
 }
 
-struct BinanceMessageHandler {}
-struct BinanceCommandTranslator {
+struct BinanceUsMessageHandler {}
+struct BinanceUsCommandTranslator {
     market_type: char,
 }
 
-impl BinanceCommandTranslator {
+impl BinanceUsCommandTranslator {
     fn topics_to_command(topics: &[(String, String)], subscribe: bool) -> String {
         let raw_topics = topics
             .iter()
@@ -211,7 +193,7 @@ impl BinanceCommandTranslator {
     }
 }
 
-impl MessageHandler for BinanceMessageHandler {
+impl MessageHandler for BinanceUsMessageHandler {
     fn handle_message(&mut self, msg: &str) -> MiscMessage {
         let resp = serde_json::from_str::<HashMap<String, Value>>(msg);
         if resp.is_err() {
@@ -250,7 +232,7 @@ impl MessageHandler for BinanceMessageHandler {
     }
 }
 
-impl CommandTranslator for BinanceCommandTranslator {
+impl CommandTranslator for BinanceUsCommandTranslator {
     fn translate_to_commands(&self, subscribe: bool, topics: &[(String, String)]) -> Vec<String> {
         let max_num_topics = if self.market_type == 'S' {
             // https://binance-docs.github.io/apidocs/spot/en/#websocket-limits
@@ -291,7 +273,7 @@ mod tests {
 
     #[test]
     fn test_one_topic() {
-        let translator = super::BinanceCommandTranslator { market_type: 'S' };
+        let translator = super::BinanceUsCommandTranslator { market_type: 'S' };
         let commands = translator
             .translate_to_commands(true, &[("aggTrade".to_string(), "BTCUSDT".to_string())]);
 
@@ -304,7 +286,7 @@ mod tests {
 
     #[test]
     fn test_two_topics() {
-        let translator = super::BinanceCommandTranslator { market_type: 'S' };
+        let translator = super::BinanceUsCommandTranslator { market_type: 'S' };
         let commands = translator.translate_to_commands(
             true,
             &[
